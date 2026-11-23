@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Entrenador Vocal | Método Vocal Integral</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            obsidian: {
+              950: '#09090b',
+              900: '#121215',
+              850: '#18181c',
+              800: '#1f1f24',
+              700: '#2c2c34',
+            },
+            amberGold: {
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#d97706',
+              600: '#b45309',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Estilos personalizados mínimos para el teclado de piano y barras de desplazamiento */
+    body {
+      background-color: #09090b;
+      color: #f4f4f5;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Personalización de controles deslizantes */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 999px;
+      background: #27272a;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fbbf24;
+      margin-top: -6px;
+      border: 2px solid #09090b;
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    /* Teclado de piano responsivo */
+    .piano-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: #3f3f46 #121215;
+    }
+
+    .piano-scroll::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .piano-scroll::-webkit-scrollbar-track {
+      background: #121215;
+      border-radius: 999px;
+    }
+
+    .piano-scroll::-webkit-scrollbar-thumb {
+      background: #3f3f46;
+      border-radius: 999px;
+    }
+
+    .key-white {
+      transition: background-color 0.08s ease, transform 0.06s ease, box-shadow 0.08s ease;
+    }
+
+    .key-white.active-note {
+      background: linear-gradient(180deg, #fde68a 0%, #f59e0b 100%) !important;
+      box-shadow: inset 0 -4px 10px rgba(180, 83, 9, 0.5), 0 0 18px rgba(245, 158, 11, 0.45);
+      transform: translateY(2px);
+    }
+
+    .key-white.tonic-marker {
+      border-bottom: 4px solid #d97706;
+    }
+
+    .key-black {
+      transition: background-color 0.08s ease, transform 0.06s ease, box-shadow 0.08s ease;
+    }
+
+    .key-black.active-note {
+      background: linear-gradient(180deg, #fbbf24 0%, #b45309 100%) !important;
+      box-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+      transform: translateY(2px);
+    }
+
+    .key-black.tonic-marker {
+      border-bottom: 3px solid #fbbf24;
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      100% { transform: scale(1.35); opacity: 0; }
+    }
+
+    .beat-pulse-active {
+      animation: pulseRing 0.35s ease-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen font-sans antialiased selection:bg-amber-400/30 selection:text-amber-200">
+
+  <!-- Contenedor Principal -->
+  <div class="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6">
+
+    <!-- Cabecera Institucional -->
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-zinc-800/90">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.7)]"></span>
+          <span class="text-xs font-semibold tracking-widest uppercase text-amber-400">Nueva Escuela de Canto | Método Vocal Integral</span>
+        </div>
+        <h1 class="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          Entrenador de Escalas y Vocalizaciones
+        </h1>
+      </div>
+
+      <!-- Controles de Audio y Volumen -->
+      <div class="flex flex-wrap items-center gap-3 bg-obsidian-900 border border-zinc-800 rounded-2xl p-3">
+        <button
+          id="btnTestAudio"
+          type="button"
+          class="px-3.5 py-2 rounded-xl text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 transition focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+          title="Comprobar salida de audio (La 440 Hz)"
+        >
+          Probar Audio (440 Hz)
+        </button>
+
+        <div class="flex items-center gap-2.5 pl-1">
+          <label for="volumeSlider" class="text-xs font-medium text-zinc-400">Volumen</label>
+          <input
+            id="volumeSlider"
+            type="range"
+            min="0"
+            max="100"
+            value="75"
+            class="w-24 sm:w-28"
+          />
+          <span id="volumeLabel" class="text-xs font-mono text-amber-400 w-8 text-right">75%</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Notificación no intrusiva (reemplaza alert) -->
+    <div id="statusBanner" class="hidden rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200 flex items-center justify-between">
+      <span id="statusBannerText"></span>
+      <button id="closeBannerBtn" type="button" class="text-xs uppercase tracking-wider text-amber-400 hover:text-amber-300 font-semibold ml-4">Cerrar</button>
+    </div>
+
+    <!-- Panel Superior: Monitor Activo y Secuencia de Grados -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- Lectura en tiempo real -->
+      <div class="lg:col-span-7 bg-obsidian-900 border border-zinc-800/90 rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-xl">
+        <div class="flex items-center justify-between gap-2 pb-4 border-b border-zinc-800/80">
+          <div>
+            <span class="text-xs uppercase tracking-wider text-zinc-400 block">Tonalidad Actual</span>
+            <div class="flex items-baseline gap-2 mt-0.5">
+              <span id="currentTonicDisplay" class="text-xl sm:text-2xl font-bold text-amber-400">Do3 (C3)</span>
+              <span id="directionBadge" class="text-xs font-medium px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">En espera</span>
+            </div>
+          </div>
+
+          <!-- Indicador visual de pulso -->
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <span class="text-xs uppercase tracking-wider text-zinc-400 block">Pulso</span>
+              <span id="bpmStatusText" class="text-sm font-semibold text-zinc-200">96 BPM</span>
+            </div>
+            <div class="relative flex items-center justify-center w-9 h-9 rounded-full bg-obsidian-950 border border-zinc-700">
+              <span id="beatRing" class="absolute inset-0 rounded-full border-2 border-amber-400 opacity-0 pointer-events-none"></span>
+              <span id="beatDot" class="w-3 h-3 rounded-full bg-zinc-600 transition-colors duration-100"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nota Activa Grande -->
+        <div class="py-6 grid grid-cols-3 gap-3 items-center text-center">
+          <div class="bg-obsidian-950/80 border border-zinc-800/80 rounded-xl p-3 sm:p-4">
+            <span class="text-[11px] uppercase tracking-wider text-zinc-400 block">Grado</span>
+            <span id="activeDegreeDisplay" class="text-2xl sm:text-4xl font-bold text-white mt-1 block">--</span>
+          </div>
+
+          <div class="bg-gradient-to-b from-amber-500/15 to-obsidian-950 border border-amber-500/40 rounded-xl p-3 sm:p-4 shadow-inner">
+            <span class="text-[11px] uppercase tracking-wider text-amber-300/90 block">Nota Activa</span>
+            <span id="activeNoteDisplay" class="text-2xl sm:text-4xl font-bold text-amber-400 mt-1 block">--</span>
+          </div>
+
+          <div class="bg-obsidian-950/80 border border-zinc-800/80 rounded-xl p-3 sm:p-4">
+            <span class="text-[11px] uppercase tracking-wider text-zinc-400 block">Frecuencia</span>
+            <span id="activeFreqDisplay" class="text-xl sm:text-3xl font-semibold font-mono text-zinc-200 mt-1 block">-- Hz</span>
+          </div>
+        </div>
+
+        <!-- Secuencia paso a paso de grados -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium uppercase tracking-wider text-zinc-400">Estructura del Patrón (Grados)</span>
+            <span id="patternCategoryLabel" class="text-xs text-amber-400/90 font-medium">Ascendente</span>
+          </div>
+          <div id="degreeSequenceContainer" class="flex flex-wrap gap-1.5 min-h-[42px] items-center bg-obsidian-950 border border-zinc-800/80 rounded-xl p-2.5">
+            <!-- Chips generados dinámicamente -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel de Transporte y Ejecución -->
+      <div class="lg:col-span-5 bg-obsidian-900 border border-zinc-800/90 rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-xl space-y-5">
+        <div>
+          <h2 class="text-sm font-semibold uppercase tracking-wider text-zinc-300 mb-1">Control de Ejecución</h2>
+          <p id="exerciseDescription" class="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+            Selecciona un patrón vocal, ajusta tu rango cómodo y pulsa Iniciar para comenzar el entrenamiento.
+          </p>
+        </div>
+
+        <!-- Botones principales de transporte -->
+        <div class="grid grid-cols-3 gap-2.5">
+          <button
+            id="btnStart"
+            type="button"
+            class="col-span-3 sm:col-span-1 py-3.5 px-4 rounded-xl font-semibold text-sm bg-amber-400 hover:bg-amber-300 text-zinc-950 shadow-lg shadow-amber-500/20 transition active:scale-[0.99]"
+          >
+            Iniciar
+          </button>
+          <button
+            id="btnPause"
+            type="button"
+            disabled
+            class="py-3.5 px-4 rounded-xl font-semibold text-sm bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 disabled:pointer-events-none text-white border border-zinc-700 transition"
+          >
+            Pausar
+          </button>
+          <button
+            id="btnStop"
+            type="button"
+            disabled
+            class="py-3.5 px-4 rounded-xl font-semibold text-sm bg-zinc-800 hover:bg-red-950/70 hover:border-red-800/60 disabled:opacity-40 disabled:pointer-events-none text-zinc-200 border border-zinc-700 transition"
+          >
+            Detener
+          </button>
+        </div>
+
+        <!-- Desplazamiento Manual de Semitono -->
+        <div class="pt-2 border-t border-zinc-800/80">
+          <span class="text-xs font-medium uppercase tracking-wider text-zinc-400 block mb-2.5">Transporte Manual de Tonalidad</span>
+          <div class="grid grid-cols-2 gap-3">
+            <button
+              id="btnSemitoneDown"
+              type="button"
+              class="py-3 px-4 rounded-xl text-sm font-medium bg-obsidian-950 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/90 transition flex items-center justify-center gap-2 active:scale-[0.98]"
+            >
+              <span class="text-amber-400 font-bold">-1</span>
+              <span>Bajar Semitono</span>
+            </button>
+            <button
+              id="btnSemitoneUp"
+              type="button"
+              class="py-3 px-4 rounded-xl text-sm font-medium bg-obsidian-950 hover:bg-zinc-800 text-zinc-200 border border-zinc-700/90 transition flex items-center justify-center gap-2 active:scale-[0.98]"
+            >
+              <span class="text-amber-400 font-bold">+1</span>
+              <span>Subir Semitono</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Opción Acorde Guía -->
+        <div class="pt-2 border-t border-zinc-800/80 flex items-center justify-between gap-4">
+          <div>
+            <label for="chkGuideChord" class="text-sm font-medium text-zinc-200 cursor-pointer block">Acorde guía previo</label>
+            <span class="text-xs text-zinc-400">Toca la tríada de tónica antes de cada repetición</span>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input id="chkGuideChord" type="checkbox" checked class="sr-only peer" />
+            <div class="w-11 h-6 bg-zinc-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-400/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección de Configuración de Ejercicios y Parámetros -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- Selector de Ejercicio Vocal (10 Patrones) -->
+      <div class="lg:col-span-7 bg-obsidian-900 border border-zinc-800/90 rounded-2xl p-5 sm:p-6 shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+          <div>
+            <h2 class="text-base font-semibold text-white">Patrón de Vocalización</h2>
+            <p class="text-xs text-zinc-400">Selecciona entre ejercicios ascendentes y descendentes</p>
+          </div>
+          <!-- Filtro rápido de dirección -->
+          <div class="inline-flex rounded-xl bg-obsidian-950 p-1 border border-zinc-800 self-start">
+            <button type="button" data-filter="all" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-800 text-amber-400 transition">Todos (10)</button>
+            <button type="button" data-filter="asc" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 transition">Ascendentes</button>
+            <button type="button" data-filter="desc" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 transition">Descendentes</button>
+          </div>
+        </div>
+
+        <div id="patternGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <!-- Tarjetas de ejercicios renderizadas por JS -->
+        </div>
+      </div>
+
+      <!-- Parámetros Vocales: Rango, Progresión, Tempo y Respiración -->
+      <div class="lg:col-span-5 bg-obsidian-900 border border-zinc-800/90 rounded-2xl p-5 sm:p-6 shadow-xl space-y-5">
+        <h2 class="text-base font-semibold text-white">Parámetros Vocales</h2>
+
+        <!-- Rango Vocal -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label for="selectStartNote" class="block text-xs font-medium uppercase tracking-wider text-zinc-400 mb-1.5">Nota Inicial (Base)</label>
+            <select
+              id="selectStartNote"
+              class="w-full rounded-xl bg-obsidian-950 border border-zinc-700 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400"
+            ></select>
+          </div>
+
+          <div>
+            <label for="selectEndNote" class="block text-xs font-medium uppercase tracking-wider text-zinc-400 mb-1.5">Nota Límite (Techo)</label>
+            <select
+              id="selectEndNote"
+              class="w-full rounded-xl bg-obsidian-950 border border-zinc-700 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400"
+            ></select>
+          </div>
+        </div>
+
+        <!-- Presets rápidos de registro -->
+        <div>
+          <span class="block text-[11px] uppercase tracking-wider text-zinc-500 mb-2">Atajos de tesitura habitual</span>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" data-range="41,60" class="preset-range-btn py-2 px-2 rounded-lg text-xs font-medium bg-obsidian-950 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition">
+              Grave (Fa2 - Do4)
+            </button>
+            <button type="button" data-range="48,67" class="preset-range-btn py-2 px-2 rounded-lg text-xs font-medium bg-obsidian-950 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition">
+              Media (Do3 - Sol4)
+            </button>
+            <button type="button" data-range="55,74" class="preset-range-btn py-2 px-2 rounded-lg text-xs font-medium bg-obsidian-950 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition">
+              Aguda (Sol3 - Re5)
+            </button>
+          </div>
+        </div>
+
+        <!-- Modo de Progresión -->
+        <div>
+          <label for="selectProgression" class="block text-xs font-medium uppercase tracking-wider text-zinc-400 mb-1.5">Modo de Progresión</label>
+          <select
+            id="selectProgression"
+            class="w-full rounded-xl bg-obsidian-950 border border-zinc-700 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-400"
+          >
+            <option value="up_down">Subida y bajada automática por semitonos</option>
+            <option value="up_only">Solo subida por semitonos hasta el límite</option>
+            <option value="down_only">Solo bajada por semitonos hasta la base</option>
+            <option value="fixed">Bucle en tonalidad fija (sin modular)</option>
+          </select>
+        </div>
+
+        <!-- Control de Tempo (BPM) -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="bpmSlider" class="text-xs font-medium uppercase tracking-wider text-zinc-400">Tempo (Velocidad)</label>
+            <span id="bpmValueBadge" class="text-sm font-mono font-semibold text-amber-400">96 BPM</span>
+          </div>
+          <input
+            id="bpmSlider"
+            type="range"
+            min="50"
+            max="180"
+            value="96"
+            class="w-full"
+          />
+          <div class="flex justify-between text-[11px] text-zinc-500 mt-1">
+            <span>50 (Lento / Legato)</span>
+            <span>115 (Moderado)</span>
+            <span>180 (Agilidad)</span>
+          </div>
+        </div>
+
+        <!-- Pausa entre repeticiones -->
+        <div>
+          <span class="block text-xs font-medium uppercase tracking-wider text-zinc-400 mb-2">Pausa de respiración entre semitonos</span>
+          <div class="grid grid-cols-3 gap-2.5">
+            <button type="button" data-pause="0" class="pause-btn py-2 px-3 rounded-xl text-xs font-medium bg-obsidian-950 text-zinc-300 border border-zinc-800 transition">
+              0 tiempos
+            </button>
+            <button type="button" data-pause="1" class="pause-btn py-2 px-3 rounded-xl text-xs font-medium bg-amber-400/15 text-amber-300 border border-amber-400/50 transition">
+              1 tiempo
+            </button>
+            <button type="button" data-pause="2" class="pause-btn py-2 px-3 rounded-xl text-xs font-medium bg-obsidian-950 text-zinc-300 border border-zinc-800 transition">
+              2 tiempos
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección Inferior: Teclado Virtual Interactivo -->
+    <section class="bg-obsidian-900 border border-zinc-800/90 rounded-2xl p-5 sm:p-6 shadow-xl">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+        <div>
+          <h2 class="text-base font-semibold text-white">Teclado de Referencia Visual e Interactivo</h2>
+          <p class="text-xs text-zinc-400">Pulsa cualquier tecla para escuchar su afinación directa. El marcador dorado inferior indica la tónica actual.</p>
+        </div>
+        <div class="flex items-center gap-4 text-xs text-zinc-400">
+          <span class="flex items-center gap-1.5">
+            <span class="w-3 h-1 bg-amber-400 inline-block rounded"></span>
+            Tónica del ejercicio
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="w-3 h-3 bg-amber-400 inline-block rounded-sm"></span>
+            Nota sonando
+          </span>
+        </div>
+      </div>
+
+      <!-- Contenedor deslizable del teclado (Fa2 / MIDI 41 a Sol5 / MIDI 79) -->
+      <div id="pianoScrollContainer" class="piano-scroll overflow-x-auto pb-2 select-none">
+        <div id="pianoKeyboard" class="relative h-44 sm:h-48 min-w-[920px] bg-obsidian-950 rounded-xl p-2 border border-zinc-800">
+          <!-- Teclas generadas por JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Pie de página sobrio -->
+    <footer class="text-center text-xs text-zinc-500 pt-2 pb-6">
+      Nueva Escuela de Canto | Herramienta de Estudio Vocal basada en el Método Vocal Integral (MVI) — Afinación estándar A4 = 440 Hz
+    </footer>
+
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * ENTRENADOR VOCAL - MÉTODO VOCAL INTEGRAL (MVI)
+     * Motor de Síntesis Web Audio API + Secuenciador Vocal + Teclado Interactivo
+     * =========================================================================
+     */
+
+    // 1. DEFINICIÓN DE NOTAS Y NOMENCLATURA DOBLE (LATINA Y ANGLOSAJONA)
+    const LATIN_NAMES = ['Do', 'Do#', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'Sib', 'Si'];
+    const ANGLO_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
+
+    /**
+     * Convierte un número MIDI a información completa de nota y frecuencia en Hz.
+     * Fórmula estándar: f = 440 * 2^((midi - 69) / 12)
+     */
+    function getMidiInfo(midi) {
+      const semitoneIndex = ((midi % 12) + 12) % 12;
+      const octave = Math.floor(midi / 12) - 1;
+      const latin = `${LATIN_NAMES[semitoneIndex]}${octave}`;
+      const anglo = `${ANGLO_NAMES[semitoneIndex]}${octave}`;
+      const freq = 440 * Math.pow(2, (midi - 69) / 12);
+      const isBlack = [1, 3, 6, 8, 10].includes(semitoneIndex);
+
+      return {
+        midi,
+        latin,
+        anglo,
+        fullLabel: `${latin} (${anglo})`,
+        freq,
+        isBlack,
+        semitoneIndex,
+        octave
+      };
+    }
+
+    // 2. CATÁLOGO DE EJERCICIOS VOCALES (ASCENDENTES Y DESCENDENTES)
+    const VOCAL_PATTERNS = [
+      {
+        id: 'rossini_asc',
+        name: 'Escala de Rossini Ascendente',
+        category: 'asc',
+        categoryLabel: 'Ascendente',
+        shortFormula: '1 - 3 - 5 - 8 - 9 - 8 - 7 - 6 - 5 - 4 - 3 - 2 - 1',
+        description: 'Arpegio mayor ascendente hasta la novena seguido de descenso diatónico por grados conjuntos. Favorece la conexión de registros y la agilidad sin peso.',
+        semitones: [0, 4, 7, 12, 14, 12, 11, 9, 7, 5, 4, 2, 0],
+        degrees: ['1', '3', '5', '8', '9', '8', '7', '6', '5', '4', '3', '2', '1'],
+        chordSemitones: [0, 4, 7]
+      },
+      {
+        id: 'rossini_desc',
+        name: 'Escala de Rossini Descendente',
+        category: 'desc',
+        categoryLabel: 'Descendente',
+        shortFormula: '8 - 5 - 3 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 5 - 3 - 1',
+        description: 'Inicio en la octava superior con arpegio descendente hacia la tónica, ascenso gradual por escala mayor y resolución arpegiada. Ideal para anclar el registro agudo desde arriba.',
+        semitones: [12, 7, 4, 0, 2, 4, 5, 7, 9, 11, 12, 7, 4, 0],
+        degrees: ['8', '5', '3', '1', '2', '3', '4', '5', '6', '7', '8', '5', '3', '1'],
+        chordSemitones: [0, 4, 7, 12]
+      },
+      {
+        id: 'octaves_asc',
+        name: 'Octavas',
+        category: 'asc',
+        categoryLabel: 'Ascendente',
+        shortFormula: '1 - 3 - 5 - 8 - 5 - 3 - 1',
+        description: 'Arpegio clásico de octava mayor (tónica, tercera, quinta y octava). Trabaja el tránsito fluido por el passaggio manteniendo la estabilidad laríngea.',
+        semitones: [0, 4, 7, 12, 7, 4, 0],
+        degrees: ['1', '3', '5', '8', '5', '3', '1'],
+        chordSemitones: [0, 4, 7]
+      },
+      {
+        id: 'octaves_desc',
+        name: 'Octavas Descendentes',
+        category: 'desc',
+        categoryLabel: 'Descendente',
+        shortFormula: '8 - 5 - 3 - 1 - 3 - 5 - 8',
+        description: 'Ataque limpio desde la octava superior descendiendo por el arpegio hacia la tónica y regresando. Ayuda a evitar el empuje de pecho al subir.',
+        semitones: [12, 7, 4, 0, 4, 7, 12],
+        degrees: ['8', '5', '3', '1', '3', '5', '8'],
+        chordSemitones: [0, 4, 7, 12]
+      },
+      {
+        id: 'fifths_asc',
+        name: 'Quintas',
+        category: 'asc',
+        categoryLabel: 'Ascendente',
+        shortFormula: '1 - 2 - 3 - 4 - 5 - 4 - 3 - 2 - 1',
+        description: 'Escala pentacordal mayor de cinco tonos consecutivos. Excelente para calentamiento inicial, igualdad tímbrica y control de flujo de aire.',
+        semitones: [0, 2, 4, 5, 7, 5, 4, 2, 0],
+        degrees: ['1', '2', '3', '4', '5', '4', '3', '2', '1'],
+        chordSemitones: [0, 4, 7]
+      },
+      {
+        id: 'fifths_desc',
+        name: 'Quintas Descendentes',
+        category: 'desc',
+        categoryLabel: 'Descendente',
+        shortFormula: '5 - 4 - 3 - 2 - 1 - 2 - 3 - 4 - 5',
+        description: 'Descenso por grados conjuntos desde el quinto grado hasta la tónica y retorno. Fomenta la relajación mandibular y la afinación descendente.',
+        semitones: [7, 5, 4, 2, 0, 2, 4, 5, 7],
+        degrees: ['5', '4', '3', '2', '1', '2', '3', '4', '5'],
+        chordSemitones: [0, 4, 7]
+      },
+      {
+        id: 'thirds_asc',
+        name: 'Terceras',
+        category: 'asc',
+        categoryLabel: 'Ascendente',
+        shortFormula: '1 - 3 - 5 - 3 - 1',
+        description: 'Tríada mayor arpegiada de quinta. Ejercicio directo para precisar intervalos de tercera mayor y menor con articulación ágil.',
+        semitones: [0, 4, 7, 4, 0],
+        degrees: ['1', '3', '5', '3', '1'],
+        chordSemitones: [0, 4, 7]
+      },
+      {
+        id: 'thirds_desc',
+        name: 'Terceras Descendentes',
+        category: 'desc',
+        categoryLabel: 'Descendente',
+        shortFormula: '5 - 3 - 1 - 3 - 5',
+        description: 'Tríada iniciada en la quinta descendente hacia la tónica. Útil para estabilizar la resonancia media y evitar caída de soporte.',
+        semitones: [7, 4, 0, 4, 7],
+        degrees: ['5', '3', '1', '3', '5'],
+        chordSemitones: [0, 4, 7]
+      },
+      {
+        id: 'octaves_rep_asc',
+        name: 'Octavas con Repetición',
+        category: 'asc',
+        categoryLabel: 'Ascendente',
+        shortFormula: '1 - 3 - 5 - 8 - 8 - 8 - 8 - 5 - 3 - 1',
+        description: 'Arpegio de octava con cuatro percusiones o ataques repetidos en la nota aguda. Entrena el cierre glótico preciso, el staccato o la resistencia en agudos.',
+        semitones: [0, 4, 7, 12, 12, 12, 12, 7, 4, 0],
+        degrees: ['1', '3', '5', '8', '8', '8', '8', '5', '3', '1'],
+        chordSemitones: [0, 4, 7]
+      },
+      {
+        id: 'octaves_rep_desc',
+        name: 'Octavas con Repetición Descendentes',
+        category: 'desc',
+        categoryLabel: 'Descendente',
+        shortFormula: '8 - 5 - 3 - 1 - 1 - 1 - 1 - 3 - 5 - 8',
+        description: 'Arpegio descendente desde la octava con cuatro repeticiones articuladas sobre la tónica grave antes de volver a subir.',
+        semitones: [12, 7, 4, 0, 0, 0, 0, 4, 7, 12],
+        degrees: ['8', '5', '3', '1', '1', '1', '1', '3', '5', '8'],
+        chordSemitones: [0, 4, 7, 12]
+      }
+    ];
+
+    // 3. MOTOR DE AUDIO (WEB AUDIO API - SÍNTESIS DE PIANO CÁLIDO)
+    class VocalPianoSynth {
+      constructor() {
+        this.ctx = null;
+        this.masterGain = null;
+        this.volume = 0.75;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.gain.value = this.volume;
+
+          // Compresor suave para evitar saturación al tocar acordes guía
+          const compressor = this.ctx.createDynamicsCompressor();
+          compressor.threshold.setValueAtTime(-14, this.ctx.currentTime);
+          compressor.knee.setValueAtTime(18, this.ctx.currentTime);
+          compressor.ratio.setValueAtTime(4, this.ctx.currentTime);
+          compressor.attack.setValueAtTime(0.005, this.ctx.currentTime);
+          compressor.release.setValueAtTime(0.15, this.ctx.currentTime);
+
+          this.masterGain.connect(compressor);
+          compressor.connect(this.ctx.destination);
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      setVolume(val) {
+        this.volume = Math.max(0, Math.min(1, val));
+        if (this.masterGain && this.ctx) {
+          this.masterGain.gain.setTargetAtTime(this.volume, this.ctx.currentTime, 0.02);
+        }
+      }
+
+      /**
+       * Sintetiza una nota con timbre de piano acústico/eléctrico cálido:
+       * Fundamental + 2º y 3º armónicos con filtro paso bajo dinámico y ADSR limpio.
+       */
+      playNote(midi, durationSec = 0.5, velocity = 0.85, startTimeOffset = 0) {
+        this.init();
+        const now = this.ctx.currentTime + startTimeOffset;
+        const freq = 440 * Math.pow(2, (midi - 69) / 12);
+
+        // Oscilador principal (triángulo suavizado para calidez)
+        const osc1 = this.ctx.createOscillator();
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(freq, now);
+
+        // Segundo armónico (octava superior con presencia sutil)
+        const osc2 = this.ctx.createOscillator();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(freq * 2, now);
+
+        // Tercer armónico (brillo controlado)
+        const osc3 = this.ctx.createOscillator();
+        osc3.type = 'sine';
+        osc3.frequency.setValueAtTime(freq * 3, now);
+
+        // Mezcla de armónicos
+        const gain1 = this.ctx.createGain();
+        const gain2 = this.ctx.createGain();
+        const gain3 = this.ctx.createGain();
+
+        gain1.gain.value = 0.68;
+        gain2.gain.value = 0.22;
+        gain3.gain.value = 0.08;
+
+        // Filtro paso bajo que simula el apagado progresivo del brillo de la cuerda
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        const initialCutoff = Math.min(4800, freq * 6.5);
+        filter.frequency.setValueAtTime(initialCutoff, now);
+        filter.frequency.exponentialRampToValueAtTime(Math.max(450, freq * 2.2), now + durationSec);
+
+        // Envolvente ADSR
+        const env = this.ctx.createGain();
+        const peak = 0.42 * velocity;
+        const attack = 0.012;
+        const decay = Math.min(0.18, durationSec * 0.35);
+        const sustainLevel = peak * 0.65;
+        const release = 0.09;
+
+        env.gain.setValueAtTime(0.0001, now);
+        env.gain.linearRampToValueAtTime(peak, now + attack);
+        env.gain.exponentialRampToValueAtTime(Math.max(0.001, sustainLevel), now + attack + decay);
+        env.gain.setValueAtTime(Math.max(0.001, sustainLevel), now + Math.max(attack + decay, durationSec - 0.02));
+        env.gain.exponentialRampToValueAtTime(0.0001, now + durationSec + release);
+
+        osc1.connect(gain1);
+        osc2.connect(gain2);
+        osc3.connect(gain3);
+
+        gain1.connect(filter);
+        gain2.connect(filter);
+        gain3.connect(filter);
+
+        filter.connect(env);
+        env.connect(this.masterGain);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc3.start(now);
+
+        const stopTime = now + durationSec + release + 0.03;
+        osc1.stop(stopTime);
+        osc2.stop(stopTime);
+        osc3.stop(stopTime);
+      }
+
+      /**
+       * Toca un acorde arpegiado muy rápido o simultáneo para ubicar la tonalidad.
+       */
+      playChord(midiNotes, durationSec = 0.65) {
+        midiNotes.forEach((m, idx) => {
+          this.playNote(m, durationSec, 0.55, idx * 0.03);
+        });
+      }
+    }
+
+    // 4. ESTADO DE LA APLICACIÓN
+    const state = {
+      selectedPatternId: 'rossini_asc',
+      patternFilter: 'all',
+      startMidi: 48,        // Do3 (C3)
+      endMidi: 67,          // Sol4 (G4)
+      currentTonicMidi: 48, // Tonalidad activa
+      progressionMode: 'up_down',
+      progressionDir: 1,    // 1 = subiendo, -1 = bajando
+      bpm: 96,
+      pauseBeats: 1,
+      playGuideChord: true,
+      isPlaying: false,
+      isPaused: false,
+      currentStepIndex: -1,
+      activeMidiNote: null,
+      timerId: null
+    };
+
+    const synth = new VocalPianoSynth();
+
+    // 5. REFERENCIAS AL DOM
+    const dom = {
+      btnTestAudio: document.getElementById('btnTestAudio'),
+      volumeSlider: document.getElementById('volumeSlider'),
+      volumeLabel: document.getElementById('volumeLabel'),
+      statusBanner: document.getElementById('statusBanner'),
+      statusBannerText: document.getElementById('statusBannerText'),
+      closeBannerBtn: document.getElementById('closeBannerBtn'),
+      currentTonicDisplay: document.getElementById('currentTonicDisplay'),
+      directionBadge: document.getElementById('directionBadge'),
+      bpmStatusText: document.getElementById('bpmStatusText'),
+      beatRing: document.getElementById('beatRing'),
+      beatDot: document.getElementById('beatDot'),
+      activeDegreeDisplay: document.getElementById('activeDegreeDisplay'),
+      activeNoteDisplay: document.getElementById('activeNoteDisplay'),
+      activeFreqDisplay: document.getElementById('activeFreqDisplay'),
+      patternCategoryLabel: document.getElementById('patternCategoryLabel'),
+      degreeSequenceContainer: document.getElementById('degreeSequenceContainer'),
+      exerciseDescription: document.getElementById('exerciseDescription'),
+      btnStart: document.getElementById('btnStart'),
+      btnPause: document.getElementById('btnPause'),
+      btnStop: document.getElementById('btnStop'),
+      btnSemitoneDown: document.getElementById('btnSemitoneDown'),
+      btnSemitoneUp: document.getElementById('btnSemitoneUp'),
+      chkGuideChord: document.getElementById('chkGuideChord'),
+      patternGrid: document.getElementById('patternGrid'),
+      selectStartNote: document.getElementById('selectStartNote'),
+      selectEndNote: document.getElementById('selectEndNote'),
+      selectProgression: document.getElementById('selectProgression'),
+      bpmSlider: document.getElementById('bpmSlider'),
+      bpmValueBadge: document.getElementById('bpmValueBadge'),
+      pianoKeyboard: document.getElementById('pianoKeyboard'),
+      pianoScrollContainer: document.getElementById('pianoScrollContainer')
+    };
+
+    // 6. UTILIDADES DE INTERFAZ Y NOTIFICACIONES
+    function showBanner(msg) {
+      dom.statusBannerText.textContent = msg;
+      dom.statusBanner.classList.remove('hidden');
+    }
+
+    function hideBanner() {
+      dom.statusBanner.classList.add('hidden');
+    }
+
+    function getSelectedPattern() {
+      return VOCAL_PATTERNS.find(p => p.id === state.selectedPatternId) || VOCAL_PATTERNS[0];
+    }
+
+    function triggerBeatVisual() {
+      dom.beatDot.classList.remove('bg-zinc-600');
+      dom.beatDot.classList.add('bg-amber-400');
+
+      dom.beatRing.classList.remove('beat-pulse-active');
+      void dom.beatRing.offsetWidth; // Forzar reflow para reiniciar animación
+      dom.beatRing.classList.add('beat-pulse-active');
+
+      setTimeout(() => {
+        dom.beatDot.classList.remove('bg-amber-400');
+        dom.beatDot.classList.add('bg-zinc-600');
+      }, 140);
+    }
+
+    // 7. CONSTRUCCIÓN DE SELECTORES DE RANGO VOCAL (Fa2 / MIDI 41 a Mi5 / MIDI 76)
+    function populateRangeSelectors() {
+      const minMidi = 41; // Fa2 (F2)
+      const maxStartMidi = 72; // Do5 (C5)
+      const maxEndMidi = 76; // Mi5 (E5)
+
+      dom.selectStartNote.innerHTML = '';
+      dom.selectEndNote.innerHTML = '';
+
+      for (let m = minMidi; m <= maxStartMidi; m++) {
+        const info = getMidiInfo(m);
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = info.fullLabel;
+        if (m === state.startMidi) opt.selected = true;
+        dom.selectStartNote.appendChild(opt);
+      }
+
+      for (let m = minMidi; m <= maxEndMidi; m++) {
+        const info = getMidiInfo(m);
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = info.fullLabel;
+        if (m === state.endMidi) opt.selected = true;
+        dom.selectEndNote.appendChild(opt);
+      }
+    }
+
+    function validateRange(changedSource) {
+      if (state.startMidi > state.endMidi) {
+        if (changedSource === 'start') {
+          state.endMidi = state.startMidi;
+          dom.selectEndNote.value = state.endMidi;
+        } else {
+          state.startMidi = state.endMidi;
+          dom.selectStartNote.value = state.startMidi;
+        }
+        showBanner('Se ha ajustado automáticamente el límite del rango para mantener coherencia entre la nota inicial y el techo.');
+      } else {
+        hideBanner();
+      }
+
+      // Ajustar tonalidad actual si queda fuera del nuevo rango
+      if (!state.isPlaying) {
+        if (state.progressionMode === 'down_only') {
+          state.currentTonicMidi = state.endMidi;
+        } else {
+          state.currentTonicMidi = state.startMidi;
+        }
+        updateTonicUI();
+      }
+    }
+
+    // 8. RENDERIZADO DE TARJETAS DE EJERCICIOS VOCALES
+    function renderPatternGrid() {
+      dom.patternGrid.innerHTML = '';
+
+      const filtered = VOCAL_PATTERNS.filter(p => {
+        if (state.patternFilter === 'all') return true;
+        return p.category === state.patternFilter;
+      });
+
+      filtered.forEach(pattern => {
+        const isSelected = pattern.id === state.selectedPatternId;
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = `text-left p-3.5 rounded-xl border transition flex flex-col justify-between gap-1.5 focus:outline-none ${
+          isSelected
+            ? 'bg-amber-400/12 border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.12)]'
+            : 'bg-obsidian-950/90 border-zinc-800 hover:border-zinc-600'
+        }`;
+
+        const badgeClass = pattern.category === 'asc'
+          ? 'bg-zinc-800 text-amber-300 border-zinc-700'
+          : 'bg-zinc-800/80 text-zinc-300 border-zinc-700';
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-2 w-full">
+            <span class="font-semibold text-sm ${isSelected ? 'text-amber-300' : 'text-zinc-100'}">${pattern.name}</span>
+            <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md border shrink-0 ${badgeClass}">
+              ${pattern.category === 'asc' ? 'Asc' : 'Desc'}
+            </span>
+          </div>
+          <span class="text-xs font-mono text-zinc-400 truncate w-full">${pattern.shortFormula}</span>
+        `;
+
+        card.addEventListener('click', () => {
+          state.selectedPatternId = pattern.id;
+          renderPatternGrid();
+          renderDegreeSequence();
+          updatePatternDescription();
+        });
+
+        dom.patternGrid.appendChild(card);
+      });
+    }
+
+    function updatePatternDescription() {
+      const pattern = getSelectedPattern();
+      dom.exerciseDescription.textContent = pattern.description;
+      dom.patternCategoryLabel.textContent = `${pattern.name} (${pattern.categoryLabel})`;
+    }
+
+    // 9. RENDERIZADO DE LA SECUENCIA DE GRADOS PASO A PASO
+    function renderDegreeSequence() {
+      const pattern = getSelectedPattern();
+      dom.degreeSequenceContainer.innerHTML = '';
+
+      pattern.degrees.forEach((deg, idx) => {
+        const chip = document.createElement('span');
+        const isCurrent = idx === state.currentStepIndex;
+        chip.className = `px-2.5 py-1 rounded-lg font-mono text-xs sm:text-sm font-semibold transition-all ${
+          isCurrent
+            ? 'bg-amber-400 text-zinc-950 scale-110 shadow-md shadow-amber-400/30'
+            : 'bg-zinc-900 text-zinc-300 border border-zinc-800'
+        }`;
+        chip.textContent = deg;
+        dom.degreeSequenceContainer.appendChild(chip);
+      });
+    }
+
+    // 10. CONSTRUCCIÓN DEL TECLADO VIRTUAL INTERACTIVO (Fa2 / MIDI 41 a Sol5 / MIDI 79)
+    const PIANO_START_MIDI = 41; // Fa2 (F2)
+    const PIANO_END_MIDI = 79;   // Sol5 (G5)
+
+    function buildPianoKeyboard() {
+      dom.pianoKeyboard.innerHTML = '';
+
+      // Contar teclas blancas para distribuir anchos porcentuales exactos
+      const whiteNotes = [];
+      for (let m = PIANO_START_MIDI; m <= PIANO_END_MIDI; m++) {
+        const info = getMidiInfo(m);
+        if (!info.isBlack) whiteNotes.push(info);
+      }
+
+      const whiteKeyWidthPercent = 100 / whiteNotes.length;
+      const blackKeyWidthPercent = whiteKeyWidthPercent * 0.62;
+
+      // Capa de teclas blancas
+      const whiteLayer = document.createElement('div');
+      whiteLayer.className = 'relative w-full h-full flex';
+
+      whiteNotes.forEach((info) => {
+        const keyBtn = document.createElement('button');
+        keyBtn.type = 'button';
+        keyBtn.dataset.midi = info.midi;
+        keyBtn.className = 'key-white relative h-full bg-zinc-100 hover:bg-white border border-zinc-400/80 rounded-b-lg flex flex-col justify-end items-center pb-2 focus:outline-none';
+        keyBtn.style.width = `${whiteKeyWidthPercent}%`;
+
+        // Etiquetar notas Do (C) y Fa (F) para orientación visual limpia
+        const showLabel = info.semitoneIndex === 0 || info.semitoneIndex === 5;
+        keyBtn.innerHTML = showLabel
+          ? `<span class="text-[10px] font-bold text-zinc-700 leading-none">${info.latin}</span>
+             <span class="text-[9px] font-medium text-zinc-500 leading-tight">${info.anglo}</span>`
+          : `<span class="text-[9px] font-medium text-zinc-400 opacity-70">${info.latin}</span>`;
+
+        attachPianoKeyEvents(keyBtn, info.midi);
+        whiteLayer.appendChild(keyBtn);
+      });
+
+      dom.pianoKeyboard.appendChild(whiteLayer);
+
+      // Capa de teclas negras posicionadas sobre las blancas
+      let whiteIndex = 0;
+      for (let m = PIANO_START_MIDI; m <= PIANO_END_MIDI; m++) {
+        const info = getMidiInfo(m);
+        if (!info.isBlack) {
+          whiteIndex++;
+        } else {
+          const blackBtn = document.createElement('button');
+          blackBtn.type = 'button';
+          blackBtn.dataset.midi = info.midi;
+          blackBtn.className = 'key-black absolute top-2 h-[58%] bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-b-md z-10 flex flex-col justify-end items-center pb-1.5 shadow-md focus:outline-none';
+          blackBtn.style.width = `${blackKeyWidthPercent}%`;
+          // Posicionar justo en la división entre la tecla blanca anterior y la siguiente
+          const leftPercent = (whiteIndex * whiteKeyWidthPercent) - (blackKeyWidthPercent / 2);
+          blackBtn.style.left = `${leftPercent}%`;
+
+          attachPianoKeyEvents(blackBtn, info.midi);
+          dom.pianoKeyboard.appendChild(blackBtn);
+        }
+      }
+
+      updatePianoVisuals();
+    }
+
+    function attachPianoKeyEvents(element, midi) {
+      const triggerManualKey = (e) => {
+        e.preventDefault();
+        synth.playNote(midi, 0.55, 0.85);
+        highlightSinglePianoKey(midi, 420);
+        const info = getMidiInfo(midi);
+        if (!state.isPlaying) {
+          dom.activeNoteDisplay.textContent = info.fullLabel;
+          dom.activeFreqDisplay.textContent = `${info.freq.toFixed(1)} Hz`;
+          dom.activeDegreeDisplay.textContent = 'Libre';
+        }
+      };
+
+      element.addEventListener('mousedown', triggerManualKey);
+      element.addEventListener('touchstart', triggerManualKey, { passive: false });
+    }
+
+    function highlightSinglePianoKey(midi, durationMs) {
+      const keyEl = dom.pianoKeyboard.querySelector(`[data-midi="${midi}"]`);
+      if (!keyEl) return;
+      keyEl.classList.add('active-note');
+      setTimeout(() => {
+        if (state.activeMidiNote !== midi) {
+          keyEl.classList.remove('active-note');
+        }
+      }, durationMs);
+    }
+
+    function updatePianoVisuals() {
+      const allKeys = dom.pianoKeyboard.querySelectorAll('[data-midi]');
+      allKeys.forEach(key => {
+        const midi = Number(key.dataset.midi);
+        key.classList.toggle('tonic-marker', midi === state.currentTonicMidi);
+        key.classList.toggle('active-note', midi === state.activeMidiNote);
+      });
+    }
+
+    function scrollPianoToTonic() {
+      const keyEl = dom.pianoKeyboard.querySelector(`[data-midi="${state.currentTonicMidi}"]`);
+      if (!keyEl) return;
+      const container = dom.pianoScrollContainer;
+      const targetScroll = keyEl.offsetLeft - (container.clientWidth / 2) + (keyEl.clientWidth * 3);
+      container.scrollTo({
+        left: Math.max(0, targetScroll),
+        behavior: 'smooth'
+      });
+    }
+
+    // 11. ACTUALIZACIÓN DE LECTURAS EN PANTALLA
+    function updateTonicUI() {
+      const info = getMidiInfo(state.currentTonicMidi);
+      dom.currentTonicDisplay.textContent = info.fullLabel;
+      updatePianoVisuals();
+      scrollPianoToTonic();
+    }
+
+    function updateStatusBadge() {
+      if (!state.isPlaying) {
+        dom.directionBadge.textContent = 'En espera';
+        dom.directionBadge.className = 'text-xs font-medium px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700';
+        return;
+      }
+      if (state.isPaused) {
+        dom.directionBadge.textContent = 'En pausa';
+        dom.directionBadge.className = 'text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40';
+        return;
+      }
+
+      let label = 'Subiendo por semitonos';
+      if (state.progressionMode === 'fixed') {
+        label = 'Tonalidad fija';
+      } else if (state.progressionDir === -1) {
+        label = 'Bajando por semitonos';
+      }
+
+      dom.directionBadge.textContent = label;
+      dom.directionBadge.className = 'text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/40';
+    }
+
+    // 12. LÓGICA DEL SECUENCIADOR DE ENTRENAMIENTO VOCAL
+    function clearScheduler() {
+      if (state.timerId) {
+        clearTimeout(state.timerId);
+        state.timerId = null;
+      }
+    }
+
+    function getBeatDurationMs() {
+      return (60 / state.bpm) * 1000;
+    }
+
+    function startExercise() {
+      synth.init();
+      hideBanner();
+
+      if (state.isPaused) {
+        state.isPaused = false;
+        updateTransportButtons();
+        updateStatusBadge();
+        scheduleNextAction(0);
+        return;
+      }
+
+      // Reiniciar parámetros de sesión
+      state.isPlaying = true;
+      state.isPaused = false;
+      state.currentStepIndex = -1;
+
+      if (state.progressionMode === 'down_only') {
+        state.currentTonicMidi = state.endMidi;
+        state.progressionDir = -1;
+      } else {
+        state.currentTonicMidi = state.startMidi;
+        state.progressionDir = 1;
+      }
+
+      updateTonicUI();
+      updateTransportButtons();
+      updateStatusBadge();
+
+      // Comenzar secuencia (con acorde guía si está activado)
+      beginRepetitionCycle();
+    }
+
+    function beginRepetitionCycle() {
+      if (!state.isPlaying || state.isPaused) return;
+
+      const pattern = getSelectedPattern();
+      const beatMs = getBeatDurationMs();
+      state.currentStepIndex = -1;
+      renderDegreeSequence();
+      updateTonicUI();
+
+      if (state.playGuideChord) {
+        // Tocar acorde guía de la tonalidad actual antes de entrar
+        const chordMidis = pattern.chordSemitones.map(offset => state.currentTonicMidi + offset);
+        const chordDurSec = Math.min(0.85, (beatMs * 1.4) / 1000);
+        synth.playChord(chordMidis, chordDurSec);
+
+        dom.activeDegreeDisplay.textContent = 'Acorde';
+        dom.activeNoteDisplay.textContent = getMidiInfo(state.currentTonicMidi).fullLabel;
+        dom.activeFreqDisplay.textContent = 'Guía';
+        triggerBeatVisual();
+
+        // Esperar 2 pulsos tras el acorde guía para que el cantante respire y entre a tiempo
+        state.timerId = setTimeout(() => {
+          playNextPatternStep();
+        }, beatMs * 1.8);
+      } else {
+        playNextPatternStep();
+      }
+    }
+
+    function playNextPatternStep() {
+      if (!state.isPlaying || state.isPaused) return;
+
+      const pattern = getSelectedPattern();
+      state.currentStepIndex++;
+
+      // Si se completaron todas las notas del patrón actual
+      if (state.currentStepIndex >= pattern.semitones.length) {
+        state.activeMidiNote = null;
+        state.currentStepIndex = -1;
+        updatePianoVisuals();
+        renderDegreeSequence();
+        advanceProgressionToNextTonic();
+        return;
+      }
+
+      const semitoneOffset = pattern.semitones[state.currentStepIndex];
+      const degreeText = pattern.degrees[state.currentStepIndex];
+      const targetMidi = state.currentTonicMidi + semitoneOffset;
+      const noteInfo = getMidiInfo(targetMidi);
+
+      const beatMs = getBeatDurationMs();
+      // Duración de nota ligeramente articulada si hay repetición de la misma nota
+      const nextOffset = pattern.semitones[state.currentStepIndex + 1];
+      const isRepeatedNext = nextOffset === semitoneOffset;
+      const noteDurationSec = (beatMs / 1000) * (isRepeatedNext ? 0.72 : 0.9);
+
+      synth.playNote(targetMidi, noteDurationSec, 0.9);
+
+      state.activeMidiNote = targetMidi;
+      dom.activeDegreeDisplay.textContent = degreeText;
+      dom.activeNoteDisplay.textContent = noteInfo.fullLabel;
+      dom.activeFreqDisplay.textContent = `${noteInfo.freq.toFixed(1)} Hz`;
+
+      triggerBeatVisual();
+      renderDegreeSequence();
+      updatePianoVisuals();
+
+      state.timerId = setTimeout(() => {
+        playNextPatternStep();
+      }, beatMs);
+    }
+
+    function advanceProgressionToNextTonic() {
+      if (!state.isPlaying || state.isPaused) return;
+
+      const beatMs = getBeatDurationMs();
+      const pauseDurationMs = state.pauseBeats * beatMs;
+
+      if (state.progressionMode === 'fixed') {
+        state.timerId = setTimeout(() => beginRepetitionCycle(), Math.max(250, pauseDurationMs));
+        return;
+      }
+
+      if (state.progressionMode === 'up_only') {
+        if (state.currentTonicMidi + 1 <= state.endMidi) {
+          state.currentTonicMidi += 1;
+          updateStatusBadge();
+          state.timerId = setTimeout(() => beginRepetitionCycle(), Math.max(250, pauseDurationMs));
+        } else {
+          stopExercise('Serie ascendente completada hasta la nota límite.');
+        }
+        return;
+      }
+
+      if (state.progressionMode === 'down_only') {
+        if (state.currentTonicMidi - 1 >= state.startMidi) {
+          state.currentTonicMidi -= 1;
+          updateStatusBadge();
+          state.timerId = setTimeout(() => beginRepetitionCycle(), Math.max(250, pauseDurationMs));
+        } else {
+          stopExercise('Serie descendente completada hasta la nota base.');
+        }
+        return;
+      }
+
+      // Modo Subida y Bajada (up_down)
+      if (state.progressionDir === 1) {
+        if (state.currentTonicMidi + 1 <= state.endMidi) {
+          state.currentTonicMidi += 1;
+        } else if (state.currentTonicMidi - 1 >= state.startMidi) {
+          // Alcanzó el techo, comienza a descender
+          state.progressionDir = -1;
+          state.currentTonicMidi -= 1;
+        } else {
+          // Rango de una sola nota
+          stopExercise('Ejercicio completado en la tonalidad seleccionada.');
+          return;
+        }
+      } else {
+        if (state.currentTonicMidi - 1 >= state.startMidi) {
+          state.currentTonicMidi -= 1;
+        } else {
+          // Regresó a la base inicial: fin de la vuelta completa
+          stopExercise('Ciclo completo de subida y bajada finalizado.');
+          return;
+        }
+      }
+
+      updateStatusBadge();
+      state.timerId = setTimeout(() => {
+        beginRepetitionCycle();
+      }, Math.max(250, pauseDurationMs));
+    }
+
+    function pauseExercise() {
+      if (!state.isPlaying || state.isPaused) return;
+      state.isPaused = true;
+      clearScheduler();
+      state.activeMidiNote = null;
+      updatePianoVisuals();
+      updateTransportButtons();
+      updateStatusBadge();
+    }
+
+    function stopExercise(completionMessage = '') {
+      state.isPlaying = false;
+      state.isPaused = false;
+      state.currentStepIndex = -1;
+      state.activeMidiNote = null;
+      clearScheduler();
+
+      dom.activeDegreeDisplay.textContent = '--';
+      dom.activeNoteDisplay.textContent = '--';
+      dom.activeFreqDisplay.textContent = '-- Hz';
+
+      renderDegreeSequence();
+      updatePianoVisuals();
+      updateTransportButtons();
+      updateStatusBadge();
+
+      if (completionMessage) {
+        showBanner(completionMessage);
+      }
+    }
+
+    function shiftTonicManually(delta) {
+      const nextMidi = state.currentTonicMidi + delta;
+      if (nextMidi < 41 || nextMidi > 74) return;
+
+      state.currentTonicMidi = nextMidi;
+      updateTonicUI();
+
+      // Si está detenido, dar referencia sonora breve de la nueva tónica
+      if (!state.isPlaying) {
+        synth.playNote(state.currentTonicMidi, 0.45, 0.8);
+        highlightSinglePianoKey(state.currentTonicMidi, 350);
+        const info = getMidiInfo(state.currentTonicMidi);
+        dom.activeNoteDisplay.textContent = info.fullLabel;
+        dom.activeFreqDisplay.textContent = `${info.freq.toFixed(1)} Hz`;
+        dom.activeDegreeDisplay.textContent = '1';
+      } else {
+        // Si está sonando, reiniciar el patrón en la nueva tónica inmediatamente
+        clearScheduler();
+        state.isPaused = false;
+        updateTransportButtons();
+        beginRepetitionCycle();
+      }
+    }
+
+    function updateTransportButtons() {
+      if (state.isPlaying && !state.isPaused) {
+        dom.btnStart.textContent = 'En curso';
+        dom.btnStart.disabled = true;
+        dom.btnStart.classList.add('opacity-50', 'pointer-events-none');
+        dom.btnPause.disabled = false;
+        dom.btnPause.textContent = 'Pausar';
+        dom.btnStop.disabled = false;
+      } else if (state.isPlaying && state.isPaused) {
+        dom.btnStart.textContent = 'Reanudar';
+        dom.btnStart.disabled = false;
+        dom.btnStart.classList.remove('opacity-50', 'pointer-events-none');
+        dom.btnPause.disabled = true;
+        dom.btnStop.disabled = false;
+      } else {
+        dom.btnStart.textContent = 'Iniciar';
+        dom.btnStart.disabled = false;
+        dom.btnStart.classList.remove('opacity-50', 'pointer-events-none');
+        dom.btnPause.disabled = true;
+        dom.btnPause.textContent = 'Pausar';
+        dom.btnStop.disabled = true;
+      }
+    }
+
+    // 13. VINCULACIÓN DE EVENTOS
+    function bindEvents() {
+      dom.btnTestAudio.addEventListener('click', () => {
+        synth.playNote(69, 0.65, 0.85); // La4 = 440 Hz
+        highlightSinglePianoKey(69, 500);
+        showBanner('Audio verificado: La4 (A4) — 440.0 Hz');
+      });
+
+      dom.closeBannerBtn.addEventListener('click', hideBanner);
+
+      dom.volumeSlider.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        dom.volumeLabel.textContent = `${val}%`;
+        synth.setVolume(val / 100);
+      });
+
+      dom.btnStart.addEventListener('click', startExercise);
+      dom.btnPause.addEventListener('click', pauseExercise);
+      dom.btnStop.addEventListener('click', () => stopExercise());
+
+      dom.btnSemitoneDown.addEventListener('click', () => shiftTonicManually(-1));
+      dom.btnSemitoneUp.addEventListener('click', () => shiftTonicManually(1));
+
+      dom.chkGuideChord.addEventListener('change', (e) => {
+        state.playGuideChord = e.target.checked;
+      });
+
+      // Filtros de dirección en tarjetas de ejercicios
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.patternFilter = btn.dataset.filter;
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('bg-zinc-800', 'text-amber-400');
+            b.classList.add('text-zinc-400');
+          });
+          btn.classList.add('bg-zinc-800', 'text-amber-400');
+          btn.classList.remove('text-zinc-400');
+          renderPatternGrid();
+        });
+      });
+
+      // Selectores de rango vocal
+      dom.selectStartNote.addEventListener('change', (e) => {
+        state.startMidi = Number(e.target.value);
+        validateRange('start');
+      });
+
+      dom.selectEndNote.addEventListener('change', (e) => {
+        state.endMidi = Number(e.target.value);
+        validateRange('end');
+      });
+
+      // Presets rápidos de rango
+      document.querySelectorAll('.preset-range-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const [start, end] = btn.dataset.range.split(',').map(Number);
+          state.startMidi = start;
+          state.endMidi = end;
+          dom.selectStartNote.value = start;
+          dom.selectEndNote.value = end;
+          validateRange('start');
+        });
+      });
+
+      // Modo de progresión
+      dom.selectProgression.addEventListener('change', (e) => {
+        state.progressionMode = e.target.value;
+        if (!state.isPlaying) {
+          state.currentTonicMidi = state.progressionMode === 'down_only' ? state.endMidi : state.startMidi;
+          updateTonicUI();
+        }
+        updateStatusBadge();
+      });
+
+      // Tempo BPM
+      dom.bpmSlider.addEventListener('input', (e) => {
+        state.bpm = Number(e.target.value);
+        dom.bpmValueBadge.textContent = `${state.bpm} BPM`;
+        dom.bpmStatusText.textContent = `${state.bpm} BPM`;
+      });
+
+      // Pausa de respiración
+      document.querySelectorAll('.pause-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.pauseBeats = Number(btn.dataset.pause);
+          document.querySelectorAll('.pause-btn').forEach(b => {
+            b.className = 'pause-btn py-2 px-3 rounded-xl text-xs font-medium bg-obsidian-950 text-zinc-300 border border-zinc-800 transition';
+          });
+          btn.className = 'pause-btn py-2 px-3 rounded-xl text-xs font-medium bg-amber-400/15 text-amber-300 border border-amber-400/50 transition';
+        });
+      });
+    }
+
+    // 14. INICIALIZACIÓN AL CARGAR LA PÁGINA
+    window.addEventListener('DOMContentLoaded', () => {
+      populateRangeSelectors();
+      renderPatternGrid();
+      updatePatternDescription();
+      renderDegreeSequence();
+      buildPianoKeyboard();
+      updateTonicUI();
+      bindEvents();
+    });
+  </script>
+</body>
+</html>
